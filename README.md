@@ -40,7 +40,7 @@ Ces commandes ne sont **pas à réimplémenter**. Ton mini-shell doit simplement
 
 Ce sont essentiellement des raccourcis ou des "alias" codés en dur dans ton shell.
 
-* **`myps`** doit lancer `ps` avec les arguments spécifiques pour afficher ce qui est demandé.
+* **`myps`** doit lancer `ps` avec les arguments spécifiques pour afficher ce qui est demandé. (`PID PPID UID VSZ(<unité>) RSS(<unité>) CMD `)
     * *Note :* La "dernière ligne somme" est un peu plus complexe. Tu devras peut-être exécuter `ps ... | awk '...'` pour faire le calcul, ou créer un petit script shell séparé que ton mini-shell exécutera.
 * **`mypstree`** doit lancer `pstree -p`.
 * **`mynetstat`** doit lancer `netstat -tunap`.

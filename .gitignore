@@ -1,0 +1,8 @@
+
+// Ignore Visual Studio Code workspace settings
+.vscode/
+
+// Makefile generated files
+aliasCommand.o
+myenv
+myenv.o
