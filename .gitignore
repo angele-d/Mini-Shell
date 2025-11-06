@@ -3,6 +3,6 @@
 .vscode/
 
 // Makefile generated files
-aliasCommand.o
+commands.o
 myenv
 myenv.o

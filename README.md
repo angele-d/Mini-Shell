@@ -11,7 +11,7 @@
 
 ---
 
-Le projet te demande de construire deux choses principales :
+Le projet demande de construire deux choses principales :
 1.  Un **interpréteur de commandes** (un mini-shell) qui gère les bases de la redirection et de l'enchaînement de commandes.
 2.  Une **série d'outils** (les commandes `my...`) spécialisés dans l'analyse "forensics" (analyse système et mémoire), qui s'appuient majoritairement sur le système de fichiers `/proc`.
 

@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
-#include "aliasCommand.h"
+#include "commands.h"
 
 #define MAX_LINE_LENGTH 80
 #define MAX_ARGS 20
@@ -170,7 +170,7 @@ void output_commands(char* init_line, char** init_args, char** cmd1, char** cmd2
     waitpid(pid1, NULL, 0);
 }
 
-int main(){
+int main(void){
     char init_line[MAX_LINE_LENGTH];
     char* init_args[3]; // To hold up to two commands and NULL
     char* cmd1[MAX_ARGS];
