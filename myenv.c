@@ -70,7 +70,7 @@ void pipe_commands(char* init_line, char** init_args, char** cmd1, char** cmd2) 
         dup2(fd[1], 1); //Redirect stdout to second command if exists
         close(fd[1]);
         close(fd[0]);
-        alias_commands(cmd1);
+        commands(cmd1);
     }
 
     //Execute second command
@@ -80,7 +80,7 @@ void pipe_commands(char* init_line, char** init_args, char** cmd1, char** cmd2) 
         dup2(fd[0], 0); //Redirect stdin to first command
         close(fd[0]);
         close(fd[1]);
-        alias_commands(cmd2);
+        commands(cmd2);
     }
 
     //Closing
@@ -124,7 +124,7 @@ void input_commands(char* init_line, char** init_args, char** cmd1, char** cmd2)
     if (pid1 == 0) { //Child process
         dup2(file, 0); //Redirect stdin to file
         close(file);
-        alias_commands(cmd1);
+        commands(cmd1);
     }
     close(file);
     waitpid(pid1, NULL, 0);
@@ -164,7 +164,7 @@ void output_commands(char* init_line, char** init_args, char** cmd1, char** cmd2
     if (pid1 == 0) { //Child process
         dup2(file, 1); //Redirect stdout to file
         close(file);
-        alias_commands(cmd1);
+        commands(cmd1);
     }
     close(file);
     waitpid(pid1, NULL, 0);
@@ -212,7 +212,7 @@ int main(void){
             pid_t pid = fork();
             if (pid < 0) { perror("Fork failed"); continue;}
             if (pid == 0) { //Child process
-                alias_commands(cmd1);
+                commands(cmd1);
             }
             waitpid(pid, NULL, 0);
             continue;

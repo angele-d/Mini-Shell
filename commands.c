@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 
-void alias_commands(char** cmd) {
+bool alias_commands(char** cmd) {
 
     if(cmd[0] == NULL) {
         fprintf(stderr, "No command provided\n");
-        return;
+        return false;
     }
     // myps alias for ps
     // TODO: Ask if it's what was asked
@@ -15,12 +16,14 @@ void alias_commands(char** cmd) {
         execvp("ps", (char* const[]){"ps", cmd[1], NULL});
         perror("execvp failed");
         exit(1);
+        return true;
     }
     // mypstree alias for pstree -p
     else if(strcmp(cmd[0], "mypstree") == 0) {
         execvp("pstree", (char* const[]){"pstree", "-p", NULL});
         perror("execvp failed");
         exit(1);
+        return true;
     }
     // mynetstat alias for netstat -tunap
     // FIXME: Ask professor if it's normal
@@ -29,6 +32,7 @@ void alias_commands(char** cmd) {
         execvp("netstat", (char* const[]){"netstat", "-tunap", NULL});
         perror("execvp failed");
         exit(1);
+        return true;
     }
     // myarp alias for arp -n
     // FIXME: Ask professor if it's normal
@@ -37,17 +41,42 @@ void alias_commands(char** cmd) {
         execvp("ip", (char* const[]){"ip", "neigh", "show", NULL});
         perror("execvp failed");
         exit(1);
+        return true;
     }
     // myexe
-    // TODO: implement myexe command when information about it provided
+    // XXX: implement myexe command when information about it provided
     else if(strcmp(cmd[0], "myexe") == 0) {
         printf("---\nMYENV INFO > myexe command not implemented yet.\n---\n");
         exit(1);
+        return true;
     }
-    // classical command
-    else{
-        execvp(cmd[0], cmd);
-        perror("execvp failed");
-        exit(1);
+    return false;
+}
+
+// TODO: Implement home_made_commands
+bool home_made_commands(char** cmd) {
+    // Placeholder for additional custom commands
+    // Currently, it just calls alias_commands
+    return false;
+}
+
+void commands(char** cmd) {
+
+    if(cmd[0] == NULL) {
+        fprintf(stderr, "No command provided\n");
+        return;
+    }
+    // Try alias commands first
+    if (!alias_commands(cmd)) {
+        printf("---\n MYENV INFO > Command not found, trying home made commands...\n---\n");
+        // Then try home made commands
+        if(!home_made_commands(cmd)) {
+            printf("---\n MYENV INFO > Command not found, classical command execution...\n---\n");
+            // Then do classical command
+            execvp(cmd[0], cmd);
+            perror("execvp failed");
+            exit(1);
+            return;
+        }
     }
 }
