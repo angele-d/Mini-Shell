@@ -6,3 +6,7 @@
 commands.o
 myenv
 myenv.o
+
+// Test files (input / output)
+in.txt
+out.txt

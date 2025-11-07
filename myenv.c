@@ -71,6 +71,7 @@ void pipe_commands(char* init_line, char** init_args, char** cmd1, char** cmd2) 
         close(fd[1]);
         close(fd[0]);
         commands(cmd1);
+        exit(0);
     }
 
     //Execute second command
@@ -81,6 +82,7 @@ void pipe_commands(char* init_line, char** init_args, char** cmd1, char** cmd2) 
         close(fd[0]);
         close(fd[1]);
         commands(cmd2);
+        exit(0);
     }
 
     //Closing
@@ -125,6 +127,7 @@ void input_commands(char* init_line, char** init_args, char** cmd1, char** cmd2)
         dup2(file, 0); //Redirect stdin to file
         close(file);
         commands(cmd1);
+        exit(0);
     }
     close(file);
     waitpid(pid1, NULL, 0);
@@ -165,6 +168,7 @@ void output_commands(char* init_line, char** init_args, char** cmd1, char** cmd2
         dup2(file, 1); //Redirect stdout to file
         close(file);
         commands(cmd1);
+        exit(0);
     }
     close(file);
     waitpid(pid1, NULL, 0);
@@ -177,7 +181,7 @@ int main(void){
     char* cmd2[MAX_ARGS];
 
     while(1){
-        printf("myenv > ");
+        fprintf(stderr,"myenv > ");
         fflush(stdout);
 
         //Read input line
@@ -218,7 +222,6 @@ int main(void){
             continue;
         }
 
-        
     }
     return 0;
 }

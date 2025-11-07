@@ -11,7 +11,7 @@ bool alias_commands(char** cmd) {
         return false;
     }
     // myps alias for ps
-    // TODO: Ask if it's what was asked
+    // FIXME: Ask if it's what was asked
     else if(strcmp(cmd[0], "myps") == 0) {
         execvp("ps", (char* const[]){"ps", cmd[1], NULL});
         perror("execvp failed");
@@ -53,30 +53,76 @@ bool alias_commands(char** cmd) {
     return false;
 }
 
-// TODO: Implement home_made_commands
+void command_myenv(int PID){
+    char chemin[64];
+    sprintf(chemin, "/proc/%d/environ", PID);
+    FILE* file = fopen(chemin, "r");
+    if (file == NULL) {
+         perror("fopen failed");
+         return;
+    }
+    char line[256];
+    while (fgets(line, sizeof(line), file) != NULL) {
+        for (char* p = line; *p != '\0'; p++) {
+            if (*p == '\0') {
+                *p = '\n';
+            }
+        }
+        // Print the modified line
+        printf("%s\n", line);
+    }
+    fclose(file);
+}
+
+
 bool home_made_commands(char** cmd) {
-    // Placeholder for additional custom commands
-    // Currently, it just calls alias_commands
+    // XXX: implement myinfo command when information about it provided
+    // myinfo implementation
+    if(strcmp(cmd[0], "myinfo") == 0) {
+        printf("---\nMYENV INFO > myinfo command not implemented yet.\n---\n");
+        return true;
+    }
+    // myenv implementation
+    else if(strcmp(cmd[0], "myenv") == 0) {
+        // if PID provided
+        if(strcmp(cmd[1], "-p") == 0 && cmd[2] != NULL) {
+            int pid = atoi(cmd[2]);
+            command_myenv(pid);
+        }
+        // else current process
+        else {
+            command_myenv(getpid());
+        }
+        return true;
+    }
+    // XXX: implement mymaps command when information about it provided
+    // mymaps implementation
+    else if(strcmp(cmd[0], "mymaps") == 0) {
+        printf("---\nMYENV INFO > mymaps command not implemented yet.\n---\n");
+        return true;
+    }
+    // XXX: implement mydump command when information about it provided
+    // mydump implementation
+    else if(strcmp(cmd[0], "mydump") == 0) {
+        printf("---\nMYENV INFO > mydump command not implemented yet.\n---\n");
+        return true;
+    }
     return false;
 }
 
 void commands(char** cmd) {
-
     if(cmd[0] == NULL) {
         fprintf(stderr, "No command provided\n");
         return;
     }
     // Try alias commands first
     if (!alias_commands(cmd)) {
-        printf("---\n MYENV INFO > Command not found, trying home made commands...\n---\n");
         // Then try home made commands
         if(!home_made_commands(cmd)) {
-            printf("---\n MYENV INFO > Command not found, classical command execution...\n---\n");
-            // Then do classical command
+            // Then do classical commands
             execvp(cmd[0], cmd);
             perror("execvp failed");
             exit(1);
-            return;
         }
     }
 }
