@@ -42,6 +42,13 @@ Il doit pouvoir lancer n'importe quelle commande externe (comme `ls -l`, `grep t
   :warning: 2 redirections max sinon ERROR
 * **Bonus :** Gérer les tâches de fond (`&`) et attendre (`wait`/`waitpid`) correctement la fin des commandes lancées en avant-plan.
 
+>[!NOTE] NB
+> - On peut se limiter à un seul pipe et 2 commandes (ex : cmd1 | cmd2) 
+> - On peut se limiter à 2 redirections max (ex : cmd < f1 > f2) .  
+> 
+> $\rightarrow$ Dans ce cas, on affichera un message informatif indiquant la non prise en charge.
+
+
 ---
 
 ## B. Les "Alias" : Commandes Emballées
@@ -55,7 +62,7 @@ Ce sont essentiellement des raccourcis ou des "alias" codés en dur dans ton she
 * **`mypstree`** doit lancer `pstree -p`.
 * **`mynetstat`** doit lancer `netstat -tunap`.
 * **`myarp`** doit lancer `arp -n`.
-* **`myexe`** doit lancer une commande (que tu dois définir, par exemple `find / -type f -exec file {} + | grep ELF`) pour trouver des exécutables.
+* **`myexe`** doit lancer une commande (que tu dois définir, par exemple `find / -type f -exec file {} + | grep ELF`) pour trouver des exécutables. *#XXX NOT DEFINED YET*
 
 ---
 
@@ -65,12 +72,24 @@ Ici, c'est le coeur de la partie "forensics". Ces commandes sont **à coder soi-
 
 Elles se basent toutes sur la lecture de fichiers virtuels dans le répertoire `/proc/<PID>/`.
 
-* **`myinfo` :** <Détails à venir>, mais affichera sûrement des infos de `/proc/cpuinfo`, `/proc/meminfo`, `/proc/version`, etc.
-* **`myenv -p <PID>` :**
-    * **Action :** Tu dois lire le fichier `/proc/<PID>/environ`.
-    * **Difficulté :** Ce n'est pas un fichier texte classique. Les variables sont séparées par des caractères nuls (`\0`) au lieu de sauts de ligne. Ton programme C devra lire ce fichier et remplacer les `\0` par des `\n` pour les afficher "proprement".
-* **`mymaps -p <PID>` :** <Détails à venir>, mais lira certainement `/proc/<PID>/maps` pour afficher les segments de mémoire alloués au processus (code, données, pile, tas, bibliothèques).
-* **`mydump -p <PID> ...` :** <Détails à venir>, mais lira très probablement `/proc/<PID>/mem` pour extraire ("dumper") une plage de mémoire brute du processus vers un fichier.
+* **`myinfo` :** Affiche des informations système utiles (via un parsing de /proc) sur 3 lignes :  
+  \<hostname> \<kernel-version> \<processor-architecture>  
+  \<time> up \<nb> days, \<hh>:\<mm>  
+  Load : <1-min> - <5-min> - <15-min>  
+  où :
+    - \<time> = l'heure actuelle (format \<hh>:\<mm>:\<ss>)  
+    - valeurs après up = durée depuis que le système est allumé (up) exprimé en nombre de jours, heures et minutes.  
+    
+    *N.B. : l'heure UTC  est acceptée*  
+  > *Exemple :*  
+  > tncy 6.1.0 x86_64  
+  > 14:56:52 up 10 days, 22:49  
+  > Load : 0.32 - 0.20 - 0.2  
+* **`myenv -p <PID>` :** Liste les variables d’environnement du processus \<PID> en lisant `/proc/<PID>/environ` et en présentant proprement chaque variable.  
+    :warning: Ce n'est pas un fichier texte classique. Les variables sont séparées par des caractères nuls (`\0`) au lieu de sauts de ligne. Le programme C devra lire ce fichier et remplacer les `\0` par des `\n` pour les afficher "proprement".
+* **`mymaps -p <PID>` :** Affiche les régions mémoire  : début/fin, permissions, offset, inode, pathname, annotations  comme [heap], [stack], ou marquage [*] suspicious ...
+* **`mydump -p <PID> --start 0x... --end 0x... -o fichier` :** copie une région mémoire du processus depuis `/proc/<PID>/mem` vers un fichier binaire d’acquisition. 
+
 
 ---
 
@@ -78,8 +97,8 @@ Elles se basent toutes sur la lecture de fichiers virtuels dans le répertoire `
 
 Ce sont des commandes "maison" supplémentaires, dans la même logique que la section C (analyse de `/proc`).
 
-* **`mylof -p <PID>` :** Le nom ressemble à "List Open Files" (comme `lsof`). Cela impliquerait de lister le contenu du répertoire `/proc/<PID>/fd/` (qui contient des liens symboliques vers les fichiers ouverts par le processus).
-* **`mydelexe` :** <À décrire>, peut-être une commande pour supprimer un exécutable en cours d'exécution de manière "furtive" (en utilisant `unlink` pendant qu'il tourne).
+* **`mylof -p <PID>` :** Pour lister tous les fichiers ouverts par le processus <PID> en parcourant correctement le  procfs 
+* **`mydelexe` :** Pour détecter les exécutables effacés mais toujours mappés/exécutés
 
 --- 
 ---
