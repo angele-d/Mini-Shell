@@ -39,6 +39,7 @@ void parse_line(char* line, char** args) { /*
     args[index] = NULL;
 }
 
+// TODO: Gérer l'erreur si + d'un 1 pipe est donné !
 void pipe_commands(char* init_line, char** init_args, char** cmd1, char** cmd2) {
     //Parse the input line
     parse_line(init_line, init_args);
@@ -189,10 +190,10 @@ int main(void){
             printf("Closing myenv...\n");
             break; // EOF OR CTRL+D
         }
-
         if(strchr(init_line, '|')){ // Handle pipe
             pipe_commands(init_line, init_args, cmd1, cmd2);
         }
+        // TODO : Réussir à gérer les doubles redirections (cat < in.txt > out.txt)
         else if(strchr(init_line, '<')){ // Handle redirection input
             input_commands(init_line, init_args, cmd1, cmd2);
         }
