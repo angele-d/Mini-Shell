@@ -53,9 +53,9 @@ bool alias_commands(char** cmd) {
     return false;
 }
 
-void command_myenv(int PID){
+void command_my(int PID, char* chem){
     char chemin[64];
-    sprintf(chemin, "/proc/%d/environ", PID);
+    sprintf(chemin, "/proc/%d/%s", PID, chem);
     FILE* file = fopen(chemin, "r");
     if (file == NULL) {
          perror("fopen failed");
@@ -87,18 +87,26 @@ bool home_made_commands(char** cmd) {
         // if PID provided
         if(strcmp(cmd[1], "-p") == 0 && cmd[2] != NULL) {
             int pid = atoi(cmd[2]);
-            command_myenv(pid);
+            command_my(pid,"environ");
         }
         // else current process
+        // FIXME: Ask if it's possible, if not delete it
         else {
-            command_myenv(getpid());
+            command_my(getpid(),"environ");
         }
         return true;
     }
-    // XXX: implement mymaps command when information about it provided
     // mymaps implementation
     else if(strcmp(cmd[0], "mymaps") == 0) {
-        printf("---\nMYENV INFO > mymaps command not implemented yet.\n---\n");
+        // if PID provided
+        if(strcmp(cmd[1], "-p") == 0 && cmd[2] != NULL) {
+            int pid = atoi(cmd[2]);
+            command_my(pid,"maps");
+        }
+        // else current process
+        else {
+            command_my(getpid(),"maps");
+        }
         return true;
     }
     // XXX: implement mydump command when information about it provided
