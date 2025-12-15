@@ -148,12 +148,15 @@ bool home_made_commands(char** cmd) {
     }
     // XXX: implement mydump command when information about it provided
     // mydump implementation
+    // mydump -p 5842 --start 0x7ffc30f57000 --end 7ffc30f59000 -o dump.bin
     else if(strcmp(cmd[0], "mydump") == 0) {
         // if PID provided
         if(strcmp(cmd[1], "-p") == 0 && cmd[2] != NULL && cmd[3] != NULL && cmd[4] != NULL) {
             int pid = atoi(cmd[2]);
             int size = atoi(cmd[4]);
             long address = atoi(cmd[3]);
+            printf("%s %s %s %s\n", cmd[0], cmd[1], cmd[2], cmd[3]);
+            printf("---\nMYENV INFO > Dumping %d bytes from address %lx of process %d\n---\n", size, address, pid);
             command_mymem(pid,address,size);
         }
         return true;
