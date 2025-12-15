@@ -10,3 +10,4 @@ myenv.o
 // Test files (input / output)
 in.txt
 out.txt
+*.bin

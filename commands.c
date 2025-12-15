@@ -72,14 +72,13 @@ void command_my(int PID, char* chem){
     fclose(file);
 }
 
-
-void command_mymem(int PID, unsigned long address, int size){
+void command_mydump(int PID, unsigned long address, unsigned long size, char *output_file){
     char chemin[64];
     sprintf(chemin, "/proc/%d/mem", PID);
     int file = open(chemin, O_RDONLY);
     if (file == -1) {
-         perror("open failed");
-         return;
+        perror("open failed");
+        return;
     }
     if (lseek(file, address, SEEK_SET) == -1) {
         perror("lseek failed");
@@ -87,30 +86,39 @@ void command_mymem(int PID, unsigned long address, int size){
         return;
     }
 
-    char buffer[16];
+    FILE *out = fopen(output_file, "wb");
+    if (out == NULL) {
+        perror("fopen output file failed");
+        close(file);
+        return;
+    }
 
+    unsigned char buffer[16];
     while (size > 0) {
         int chunk;
         if(size > 16) chunk = 16;
-        else chunk =  size;
+        else chunk = size;
 
         ssize_t n = read(file, buffer, chunk);
         if (n <= 0) {
             perror("read failed");
             close(file);
+            fclose(out);
             return;
         }
-
-        printf("%016lx: ", address);
+        
+        fprintf(out, "%016lx: ", address);
         for (int i = 0; i < n; i++) {
-            printf("%02x ", buffer[i]);
+            fprintf(out, "%02x ", buffer[i]);
         }
-        printf("\n");
+        fprintf(out, "\n");
         address += n;
         size -= n;
     }
     close(file);
-}
+    fclose(out);
+} 
+
 
 void myinfo(void){
     char hostname[256];
@@ -163,7 +171,6 @@ void myinfo(void){
 }
 
 
-
 bool home_made_commands(char** cmd) {
     // myinfo implementation
     if(strcmp(cmd[0], "myinfo") == 0) {
@@ -200,19 +207,28 @@ bool home_made_commands(char** cmd) {
     }
     // XXX: implement mydump command when information about it provided
     // mydump implementation
-    // mydump -p 5842 --start 0x7ffc30f57000 --end 7ffc30f59000 -o dump.bin
+    // mydump -p 5842 --start 0x7ffc30f57000 --end 0x7ffc30f59000 -o dump.bin
     else if(strcmp(cmd[0], "mydump") == 0) {
         // if PID provided
-        if(strcmp(cmd[1], "-p") == 0 && cmd[2] != NULL && cmd[3] != NULL && cmd[4] != NULL) {
+        if(strcmp(cmd[1], "-p") == 0 && cmd[2] != NULL) {
             int pid = atoi(cmd[2]);
-            int size = atoi(cmd[4]);
-            long address = atoi(cmd[3]);
-            printf("%s %s %s %s\n", cmd[0], cmd[1], cmd[2], cmd[3]);
-            printf("---\nMYENV INFO > Dumping %d bytes from address %lx of process %d\n---\n", size, address, pid);
-            command_mymem(pid,address,size);
+            // Check if --start and --end provided
+            if(strcmp(cmd[3], "--start") == 0 && cmd[4] != NULL && strcmp(cmd[5], "--end") == 0 && cmd[6] != NULL) {
+                unsigned long start = strtoul(cmd[4], NULL, 0);
+                unsigned long end = strtoul(cmd[6], NULL, 0);
+                unsigned long size = end - start;
+                // Check if -o provided
+                if(strcmp(cmd[7], "-o") == 0 && cmd[8] != NULL) {
+                    command_mydump(pid,start,size, cmd[8]);
+                } else {
+                    command_mydump(pid,start,size, "mydump_output.bin");
+                }
+            } else {
+            printf("---\nMYENV ERROR > On mydump: Invalid or missing --start/--end parameters\n---\n");
+            }
         }
         return true;
-    }
+    } 
     return false;
 }
 
