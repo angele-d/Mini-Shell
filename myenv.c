@@ -182,12 +182,12 @@ int main(void){
     char* cmd2[MAX_ARGS];
 
     while(1){
-        fprintf(stderr,"myenv > ");
+        fprintf(stderr,"\033[34mmyenv >\033[0m ");
         fflush(stdout);
 
         //Read input line
         if (fgets(init_line, sizeof(init_line), stdin) == NULL) {
-            printf("Closing myenv...\n");
+            printf("\033[34mClosing myenv...\033[0m\n");
             break; // EOF OR CTRL+D
         }
         if(strchr(init_line, '|')){ // Handle pipe
@@ -210,7 +210,7 @@ int main(void){
             //Parse first command
             parse_command(init_args[0], cmd1);
             if(strcmp(cmd1[0], "exit") == 0){ //Exit command
-                printf("Closing myenv...\n");
+                printf("\033[34mClosing myenv...\033[0m\n");
                 break;
             }
 
