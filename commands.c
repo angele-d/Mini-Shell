@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <fcntl.h>
+#include <sys/utsname.h>
+#include <time.h>
 
 bool alias_commands(char** cmd) {
 
@@ -110,12 +112,62 @@ void command_mymem(int PID, unsigned long address, int size){
     close(file);
 }
 
+void myinfo(void){
+    char hostname[256];
+    struct utsname uts;
+
+    gethostname(hostname, sizeof(hostname));
+    uname(&uts);
+
+    printf("%s %s %s\n", hostname, uts.release, uts.machine);
+
+    time_t now = time(NULL);
+    struct tm *tm = localtime(&now);
+
+    FILE *f_uptime = fopen("/proc/uptime", "r");
+    if (!f_uptime) {
+        perror("fopen /proc/uptime");
+        return;
+    }
+
+    double uptime_seconds;
+    fscanf(f_uptime, "%lf", &uptime_seconds);
+    fclose(f_uptime);
+
+    long up = (long)uptime_seconds;
+
+    int days = up / 86400;
+    int hours = (up % 86400) / 3600;
+    int minutes = (up % 3600) / 60;
+
+    printf("%02d:%02d:%02d up %d days, %02d:%02d\n",
+           tm->tm_hour,
+           tm->tm_min,
+           tm->tm_sec,
+           days,
+           hours,
+           minutes);
+
+    FILE *f_load = fopen("/proc/loadavg", "r");
+    if (!f_load) {
+        perror("fopen /proc/loadavg");
+        return;
+    }
+
+    double l1, l5, l15;
+    fscanf(f_load, "%lf %lf %lf", &l1, &l5, &l15);
+    fclose(f_load);
+
+    printf("Load : %.2f - %.2f - %.2f\n", l1, l5, l15);
+
+}
+
+
 
 bool home_made_commands(char** cmd) {
-    // XXX: implement myinfo command when information about it provided
     // myinfo implementation
     if(strcmp(cmd[0], "myinfo") == 0) {
-        printf("---\nMYENV INFO > myinfo command not implemented yet.\n---\n");
+        myinfo();
         return true;
     }
     // myenv implementation
