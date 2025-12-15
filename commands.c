@@ -205,7 +205,6 @@ bool home_made_commands(char** cmd) {
         }
         return true;
     }
-    // XXX: implement mydump command when information about it provided
     // mydump implementation
     // mydump -p 5842 --start 0x7ffc30f57000 --end 0x7ffc30f59000 -o dump.bin
     else if(strcmp(cmd[0], "mydump") == 0) {
