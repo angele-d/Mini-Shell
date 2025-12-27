@@ -39,8 +39,22 @@ void parse_line(char* line, char** args) { /*
     args[index] = NULL;
 }
 
-// TODO: Gérer l'erreur si + d'un 1 pipe est donné !
+int count_pipes(const char *line) {
+    int count = 0;
+    while (*line) {
+        if (*line == '|')
+            count++;
+        line++;
+    }
+    return count;
+}
+
 void pipe_commands(char* init_line, char** init_args, char** cmd1, char** cmd2) {
+    if (count_pipes(init_line) > 1) {
+        fprintf(stderr, "Error: More than one pipe is not supported.\n");
+        return;
+    }
+    
     //Parse the input line
     parse_line(init_line, init_args);
     if(init_args[0] == NULL){ // No command entered
@@ -193,7 +207,56 @@ int main(void){
         if(strchr(init_line, '|')){ // Handle pipe
             pipe_commands(init_line, init_args, cmd1, cmd2);
         }
-        // TODO : Réussir à gérer les doubles redirections (cat < in.txt > out.txt)
+        else if (strchr(init_line, '<') && strchr(init_line, '>')) {
+
+            char *cmd_part;
+            char *infile;
+            char *outfile;
+
+            cmd_part = strtok(init_line, "<>");
+            infile   = strtok(NULL, "<>");
+            outfile  = strtok(NULL, "<>");
+
+            if (!cmd_part || !infile || !outfile) {
+                fprintf(stderr, "Syntax error\n");
+                continue;
+            }
+
+            infile = strtok(infile, " \t\n");
+            outfile = strtok(outfile, " \t\n");
+
+            parse_command(cmd_part, cmd1);
+
+            int fd_in = open(infile, O_RDONLY);
+            if (fd_in < 0) {
+                perror("open input");
+                continue;
+            }
+
+            int fd_out = open(outfile, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+            if (fd_out < 0) {
+                perror("open output");
+                close(fd_in);
+                continue;
+            }
+
+            pid_t pid = fork();
+            if (pid == 0) {
+                dup2(fd_in, STDIN_FILENO);
+                dup2(fd_out, STDOUT_FILENO);
+
+                close(fd_in);
+                close(fd_out);
+
+                commands(cmd1);
+                exit(0);
+            }
+
+            close(fd_in);
+            close(fd_out);
+            waitpid(pid, NULL, 0);
+        }
+
         else if(strchr(init_line, '<')){ // Handle redirection input
             input_commands(init_line, init_args, cmd1, cmd2);
         }
