@@ -4,6 +4,7 @@
 
 //Non-called functions declarations
 void command_myenv(int pid);
+void command_myexe(char* chemin);
 bool alias_commands(char** cmd);
 bool home_made_commands(char** cmd);
 

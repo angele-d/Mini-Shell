@@ -44,10 +44,17 @@ bool alias_commands(char** cmd) {
         exit(1);
         return true;
     }
-    // myexe
-    // XXX: implement myexe command when information about it provided
+    // myexe <chemin> alias for finding executable ELF files
+    // This function wasn't specified in the subject, so we implement as we think best
     else if(strcmp(cmd[0], "myexe") == 0) {
-        printf("---\nMYENV INFO > myexe command not implemented yet.\n---\n");
+        if( cmd[1] == NULL ) {
+            fprintf(stderr, "Usage: myexe <chemin>\n");
+            return true;
+        }
+        char command[512];
+        // NB: Using '2>/dev/null' to suppress permission denied errors
+        snprintf(command, sizeof(command), "find %s -type f -executable -exec file {} \\; 2>/dev/null | grep ELF", cmd[1]);
+        system(command);
         exit(1);
         return true;
     }
