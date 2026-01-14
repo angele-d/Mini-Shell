@@ -1,7 +1,9 @@
 CFLAGS = -std=c99 -Wall -Wformat -Wextra -pedantic -g
 CC = gcc
 
-all: myenv
+all: build
+
+build: myenv
 
 run: run_myenv
 

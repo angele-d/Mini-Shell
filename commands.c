@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,6 @@ bool alias_commands(char** cmd) {
         return false;
     }
     // myps alias for ps
-    // FIXME: Ask if it's what was asked
     else if(strcmp(cmd[0], "myps") == 0) {
         execvp("ps", (char* const[]){"ps", cmd[1], NULL});
         perror("execvp failed");
@@ -29,7 +29,6 @@ bool alias_commands(char** cmd) {
         return true;
     }
     // mynetstat alias for netstat -tunap
-    // FIXME: Ask professor if it's normal
     else if(strcmp(cmd[0], "mynetstat") == 0) {
         printf("---\nMYENV INFO > WARNING: this command may not work if net-tools is not installed\n---\n");
         execvp("netstat", (char* const[]){"netstat", "-tunap", NULL});
@@ -38,7 +37,6 @@ bool alias_commands(char** cmd) {
         return true;
     }
     // myarp alias for arp -n
-    // FIXME: Ask professor if it's normal
     else if(strcmp(cmd[0], "myarp") == 0) {
         printf("---\nMYENV INFO > arp -n is deprecated, using ip neigh show instead.\n---\n");
         execvp("ip", (char* const[]){"ip", "neigh", "show", NULL});
@@ -185,7 +183,6 @@ bool home_made_commands(char** cmd) {
             command_my(pid,"environ");
         }
         // else current process
-        // FIXME: Ask if it's possible, if not delete it
         else {
             command_my(getpid(),"environ");
         }
@@ -199,7 +196,6 @@ bool home_made_commands(char** cmd) {
             command_my(pid,"maps");
         }
         // else current process
-        // FIXME: Ask if it's possible, if not delete it
         else {
             command_my(getpid(),"maps");
         }
