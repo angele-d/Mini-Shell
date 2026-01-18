@@ -1,0 +1,154 @@
+On lance le faux malware en arrière plan:
+    python3 malware.py &
+Celui-ci contient :
+Une information sensible que l'on va essayer d'extraire
+Une socket d'écoute réseau.
+
+On lance myenv
+    sudo ./myenv
+
+On regarde la charge moyenne (un vrai malware pourrait l'affecter, mais pour le bien de la présentation
+on ne fera pas ça)
+    myinfo
+
+On regarde mynestat et on s'aperçoit que le port 0.0.0.0:4444 est écouté par un script python3
+    mynestat
+On note ici le PID du programme suspect (ex : 9455)
+
+On regarde ensuite mypstree pour retrouver le pid identifié :
+    mypstree
+│               ├─gnome-terminal-(9414)─┬─bash(9423)─┬─python3(9455)
+│               │                       │            └─sudo(9468)───+
+│               │                       ├─{gnome-terminal-}(9415)
+│               │                       ├─{gnome-terminal-}(9416)
+│               │                       ├─{gnome-terminal-}(9417)
+│               │                       ├─{gnome-terminal-}(9418)
+│               │                       └─{gnome-terminal-}(9421)
+On apprend ici que le processus est lié à mon terminal, ce qui signifie que fermer le terminal
+suffira, un vrai script aurait pu faire un fork, pour mieux ce déguiser.
+
+Ensuite on vérifie l'environnement du système avec 
+    myenv -p [PID]
+Ensuite on a accès a différente valeurs :
+On a la confirmation que le script à été lancé par une session bash
+On voit mon nom d'utilisateur, donc le script n'a pas été lancé par un administrateur
+On voit les variables correspondant aux couleurs utilisés pour LS
+On voit que c'est un dossier relativement "normal"
+-> Le faiseur de malware n'a pas tenté de ce cacher excivement, car il y a ici beaucoup d'info
+
+Ensuite on regarde la cartographie mémoire du processus pour savoir ou utiliser le mydump:
+    mymaps -p [PID]
+
+On identifie différentes zone mémoire, avec différent types d'accès pour pouvoir ensuite utiliser mydumps
+Il est probable que la variable que nous cherchons soit en rw, cherchons donc les zones les plus probables.
+
+00400000-00420000 r--p 00000000 08:02 27919054                           /usr/bin/python3.12
+
+00420000-00703000 r-xp 00020000 08:02 27919054                           /usr/bin/python3.12
+
+00703000-00a27000 r--p 00303000 08:02 27919054                           /usr/bin/python3.12
+
+00a27000-00a28000 r--p 00627000 08:02 27919054                           /usr/bin/python3.12
+
+00a28000-00ba6000 rw-p 00628000 08:02 27919054                           /usr/bin/python3.12
+
+00ba6000-00baa000 rw-p 00000000 00:00 0 
+
+PREMIERE ZONE MEMOIRE INTERESSANTE : 0e49a000-0e5b7000 rw-p 00000000 00:00 0                                  [heap]
+
+7a89d4b00000-7a89d4c00000 rw-p 00000000 00:00 0 
+
+7a89d4c00000-7a89d5176000 r--p 00000000 08:02 27918544                   /usr/lib/locale/locale-archive
+
+7a89d51df000-7a89d5200000 rw-p 00000000 00:00 0 
+
+7a89d5200000-7a89d5228000 r--p 00000000 08:02 27929658                   /usr/lib/x86_64-linux-gnu/libc.so.6
+
+7a89d5228000-7a89d53b0000 r-xp 00028000 08:02 27929658                   /usr/lib/x86_64-linux-gnu/libc.so.6
+
+7a89d53b0000-7a89d53ff000 r--p 001b0000 08:02 27929658                   /usr/lib/x86_64-linux-gnu/libc.so.6
+
+7a89d53ff000-7a89d5403000 r--p 001fe000 08:02 27929658                   /usr/lib/x86_64-linux-gnu/libc.so.6
+
+7a89d5403000-7a89d5405000 rw-p 00202000 08:02 27929658                   /usr/lib/x86_64-linux-gnu/libc.so.6
+
+7a89d5405000-7a89d5412000 rw-p 00000000 00:00 0 
+
+ZONE INTERESSANTE : 7a89d5423000-7a89d5566000 rw-p 00000000 00:00 0 
+
+7a89d5566000-7a89d556a000 r--p 00000000 08:02 27918446                   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+
+7a89d556a000-7a89d5587000 r-xp 00004000 08:02 27918446                   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+
+7a89d5587000-7a89d558f000 r--p 00021000 08:02 27918446                   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+
+7a89d558f000-7a89d5591000 r--p 00028000 08:02 27918446                   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+
+7a89d5591000-7a89d5592000 rw-p 0002a000 08:02 27918446                   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+
+7a89d5592000-7a89d5594000 r--p 00000000 08:02 27919171                   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+
+7a89d5594000-7a89d55a6000 r-xp 00002000 08:02 27919171                   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+
+7a89d55a6000-7a89d55ac000 r--p 00014000 08:02 27919171                   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+
+7a89d55ac000-7a89d55ad000 r--p 0001a000 08:02 27919171                   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+
+7a89d55ad000-7a89d55ae000 rw-p 0001b000 08:02 27919171                   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+
+7a89d55ae000-7a89d55be000 r--p 00000000 08:02 27929661                   /usr/lib/x86_64-linux-gnu/libm.so.6
+
+7a89d55be000-7a89d563d000 r-xp 00010000 08:02 27929661                   /usr/lib/x86_64-linux-gnu/libm.so.6
+
+7a89d563d000-7a89d5695000 r--p 0008f000 08:02 27929661                   /usr/lib/x86_64-linux-gnu/libm.so.6
+
+7a89d5695000-7a89d5696000 r--p 000e7000 08:02 27929661                   /usr/lib/x86_64-linux-gnu/libm.so.6
+
+7a89d5696000-7a89d5697000 rw-p 000e8000 08:02 27929661                   /usr/lib/x86_64-linux-gnu/libm.so.6
+
+7a89d56ab000-7a89d56af000 rw-p 00000000 00:00 0 
+
+7a89d56af000-7a89d56b6000 r--s 00000000 08:02 27929648                   /usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache
+
+7a89d56b6000-7a89d56b8000 rw-p 00000000 00:00 0 
+
+7a89d56b8000-7a89d56b9000 r--p 00000000 08:02 27929655                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+
+7a89d56b9000-7a89d56e4000 r-xp 00001000 08:02 27929655                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+
+7a89d56e4000-7a89d56ee000 r--p 0002c000 08:02 27929655                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+
+7a89d56ee000-7a89d56f0000 r--p 00036000 08:02 27929655                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+
+7a89d56f0000-7a89d56f2000 rw-p 00038000 08:02 27929655                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+
+Troisième zone intéressante 7ffd34de5000-7ffd34e06000 rw-p 00000000 00:00 0                          [stack]
+
+7ffd34f6e000-7ffd34f72000 r--p 00000000 00:00 0                          [vvar]
+
+7ffd34f72000-7ffd34f74000 r-xp 00000000 00:00 0                          [vdso]
+
+ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]
+
+Pourquoi cette zone la plutot que d'autre  ? C'est un rw anonyme, et python stocke ces données
+soit dans le tas, soit dans la pile, soit dans un rw anonyme, celui-ci est suspect car il est plutot haut
+dans la pile, et particulièrement gros (*il faudra faire plusieurs entrainement pour voir si on est capable de le retrouver)
+
+
+On effectue ensuite des dumps pour voir si on peut avoir accès à notre clé :
+    myenv > mydump -p 9133 --start 0x0e49a000 --end 0x0e5b7000 -o heap.bin ZONE 1
+    myenv > mydump -p 9133 --start 0x7a89d5423000 --end 0x7a89d5566000 -o data.bin ZONE 2
+    myenv > mydump -p 9133 --start 0x7ffd34de5000 --end 0x7ffd34e06000 -o stack.bin ZONE 3
+
+On cherche ensuite la séquence C L E dans les fichiers trouvés :
+    myenv > cat heap.bin | grep 43.4c.45
+    myenv > cat data.bin | grep 43.4c.45
+Si on la trouve, on est content :)
+
+
+
+
+
+
+
+
