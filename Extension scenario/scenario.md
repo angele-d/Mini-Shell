@@ -167,16 +167,31 @@ myenv > mydump -p 9133 --start 0x7ffd34de5000 --end 0x7ffd34e06000 -o stack.bin
 
 ---
 
-## Étape 9 : Recherche de la clé
+## Étape 9 : Analyse des dumps mémoire
 
-Chercher la séquence `C L E` (en hexadécimal : `43.4c.45`) dans les fichiers :
+**Recherche d'informations sensibles dans les dumps :**
 
 ```bash
-myenv > cat heap.bin | grep 43.4c.45
-myenv > cat data.bin | grep 43.4c.45
+strings heap.bin | less
+strings data.bin | less
+strings stack.bin | less
 ```
 
-**Résultat attendu :** Si la clé est trouvée, mission accomplie ! ✓
+**Recherche de patterns spécifiques (adresses IP, ports, etc.) :**
+```bash
+strings heap.bin | grep "4444"
+strings heap.bin | grep "0.0.0.0"
+```
+
+> **Note importante :** Dans ce scénario simplifié avec Python, les constantes de chaînes sont optimisées par l'interpréteur et stockées dans des sections read-only du code, pas dans la heap/stack modifiable. Un vrai malware compilé (C/C++) stockerait ses secrets dans des zones mémoire plus facilement extractibles.
+>
+> **En pratique réelle :** Un analyste utiliserait des outils spécialisés comme:
+> - `volatility` pour l'analyse forensique mémoire
+> - `gdb` pour l'inspection en temps réel
+> - `strings` avec des filtres plus sophistiqués
+> - Analyse de l'historique bash, des connexions réseau actives, etc.
+
+**Résultat attendu :** Démonstration de la méthode d'extraction mémoire, même si le secret Python n'est pas directement visible. ✓
 
 ---
 

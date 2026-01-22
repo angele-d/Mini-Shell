@@ -18,5 +18,8 @@ commands.o: commands.c commands.h
 run_myenv :
 	./myenv
 
-clean:
+kill_port:
+	@lsof -ti:4444 | xargs kill -9 2>/dev/null || echo "No process on port 4444"
+
+clean: kill_port
 	rm -f myenv *.o
