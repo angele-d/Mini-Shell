@@ -10,17 +10,56 @@
 #define MAX_ARGS 20
 
 void parse_command(char* command, char** cmd_args) { /*
-    Parse a single command into its arguments
+    Parse a single command into its arguments, handling quoted strings
     */
-    char* token;
     int index = 0;
-
-    token = strtok(command, " \n\t");
-    while (token != NULL && index < MAX_ARGS - 1) {
-        cmd_args[index] = token;
-        index++;
-        token = strtok(NULL, " \n\t");
+    char* ptr = command;
+    char* start;
+    
+    // Skip leading whitespace
+    while (*ptr && (*ptr == ' ' || *ptr == '\t' || *ptr == '\n')) {
+        ptr++;
     }
+    
+    while (*ptr && index < MAX_ARGS - 1) {
+        start = ptr;
+        
+        // Check if we're starting a quoted string
+        if (*ptr == '"' || *ptr == '\'') {
+            char quote_char = *ptr;
+            ptr++; // Skip opening quote
+            start = ptr;
+            
+            // Find the closing quote
+            while (*ptr && *ptr != quote_char) {
+                ptr++;
+            }
+            
+            if (*ptr == quote_char) {
+                *ptr = '\0'; // Null-terminate the string (removing closing quote)
+                cmd_args[index++] = start;
+                ptr++; // Move past the closing quote
+            }
+        } else {
+            // Regular token - read until whitespace
+            while (*ptr && *ptr != ' ' && *ptr != '\t' && *ptr != '\n') {
+                ptr++;
+            }
+            
+            if (*ptr) {
+                *ptr = '\0'; // Null-terminate
+                ptr++;
+            }
+            
+            cmd_args[index++] = start;
+        }
+        
+        // Skip trailing whitespace
+        while (*ptr && (*ptr == ' ' || *ptr == '\t' || *ptr == '\n')) {
+            ptr++;
+        }
+    }
+    
     cmd_args[index] = NULL;
 }
 
