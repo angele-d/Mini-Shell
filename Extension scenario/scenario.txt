@@ -4,16 +4,34 @@ Celui-ci contient :
 Une information sensible que l'on va essayer d'extraire
 Une socket d'écoute réseau.
 
+
+
+
+
 On lance myenv
     sudo ./myenv
+
+
+
+
 
 On regarde la charge moyenne (un vrai malware pourrait l'affecter, mais pour le bien de la présentation
 on ne fera pas ça)
     myinfo
 
-On regarde mynestat et on s'aperçoit que le port 0.0.0.0:4444 est écouté par un script python3
-    mynestat
+
+
+
+
+
+On regarde mynetstat et on s'aperçoit que le port 0.0.0.0:4444 est écouté par un script python3
+    mynetstat
 On note ici le PID du programme suspect (ex : 9455)
+
+
+
+
+
 
 On regarde ensuite mypstree pour retrouver le pid identifié :
     mypstree
@@ -27,6 +45,13 @@ On regarde ensuite mypstree pour retrouver le pid identifié :
 On apprend ici que le processus est lié à mon terminal, ce qui signifie que fermer le terminal
 suffira, un vrai script aurait pu faire un fork, pour mieux ce déguiser.
 
+
+
+
+
+
+
+
 Ensuite on vérifie l'environnement du système avec 
     myenv -p [PID]
 Ensuite on a accès a différente valeurs :
@@ -35,6 +60,12 @@ On voit mon nom d'utilisateur, donc le script n'a pas été lancé par un admini
 On voit les variables correspondant aux couleurs utilisés pour LS
 On voit que c'est un dossier relativement "normal"
 -> Le faiseur de malware n'a pas tenté de ce cacher excivement, car il y a ici beaucoup d'info
+
+
+
+
+
+
 
 Ensuite on regarde la cartographie mémoire du processus pour savoir ou utiliser le mydump:
     mymaps -p [PID]
@@ -135,10 +166,17 @@ soit dans le tas, soit dans la pile, soit dans un rw anonyme, celui-ci est suspe
 dans la pile, et particulièrement gros (*il faudra faire plusieurs entrainement pour voir si on est capable de le retrouver)
 
 
+
+
+
 On effectue ensuite des dumps pour voir si on peut avoir accès à notre clé :
     myenv > mydump -p 9133 --start 0x0e49a000 --end 0x0e5b7000 -o heap.bin ZONE 1
     myenv > mydump -p 9133 --start 0x7a89d5423000 --end 0x7a89d5566000 -o data.bin ZONE 2
     myenv > mydump -p 9133 --start 0x7ffd34de5000 --end 0x7ffd34e06000 -o stack.bin ZONE 3
+
+
+
+
 
 On cherche ensuite la séquence C L E dans les fichiers trouvés :
     myenv > cat heap.bin | grep 43.4c.45
