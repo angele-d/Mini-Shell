@@ -1,5 +1,10 @@
 # Scénario d'extraction de malware
 
+## Etape 0 : Préparation de l'environnement
+
+Tout d'abord, utiliser `make clean`  
+puis `make` pour compiler les outils nécessaires.
+
 ## Étape 1 : Lancement du faux malware
 
 Lancer le faux malware en arrière-plan :
@@ -169,8 +174,9 @@ myenv > mydump -p 9133 --start 0x7ffd34de5000 --end 0x7ffd34e06000 -o stack.bin
 
 ## Étape 9 : Analyse des dumps mémoire
 
-**Recherche d'informations sensibles dans les dumps :**
+:warning: Copier-coller les commandes suivantes dans le terminal.
 
+**Recherche d'informations sensibles dans les dumps :**
 ```bash
 strings heap.bin | less
 strings data.bin | less
