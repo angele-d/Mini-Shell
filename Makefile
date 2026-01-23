@@ -21,5 +21,8 @@ run_myenv :
 kill_port:
 	@lsof -ti:4444 | xargs kill -9 2>/dev/null || echo "No process on port 4444"
 
-clean: kill_port
+bin_clean: 
+	rm -f data.bin heap.bin stack.bin
+
+clean: kill_port bin_clean
 	rm -f myenv *.o
