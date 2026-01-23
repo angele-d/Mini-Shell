@@ -181,6 +181,7 @@ On effectue ensuite des dumps pour voir si on peut avoir accès à notre clé :
 On cherche ensuite la séquence C L E dans les fichiers trouvés :
     myenv > cat heap.bin | grep 43.4c.45
     myenv > cat data.bin | grep 43.4c.45
+    myenv > cat stack.bin | grep 43.4c.45
 Si on la trouve, on est content :)
 
 

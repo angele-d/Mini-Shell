@@ -80,10 +80,10 @@ myenv -p [PID]
 ```
 
 **Informations obtenues :**
-- ✓ Confirmation que le script a été lancé par une session `bash`
-- ✓ Identification de l'utilisateur (pas d'administrateur)
-- ✓ Variables d'environnement pour les couleurs utilisés par `ls`
-- ✓ Dossier relativement "normal"
+- Confirmation que le script a été lancé par une session `bash`
+- Identification de l'utilisateur (pas d'administrateur)
+- Variables d'environnement pour les couleurs utilisés par `ls`
+- Dossier relativement "normal"
 
 > **Observation :** Le malware ne s'est pas caché excessivement, contenant beaucoup d'informations révélatrices
 
@@ -176,18 +176,12 @@ myenv > mydump -p 9133 --start 0x7ffd34de5000 --end 0x7ffd34e06000 -o stack.bin
 
 :warning: Copier-coller les commandes suivantes dans le terminal.
 
-**Recherche d'informations sensibles dans les dumps :**
 ```bash
-strings heap.bin | less
-strings data.bin | less
-strings stack.bin | less
+cat heap.bin | grep 43.4c.45
+cat data.bin | grep 43.4c.45
+cat stack.bin | grep 43.4c.45
 ```
 
-**Recherche de patterns spécifiques (adresses IP, ports, etc.) :**
-```bash
-strings heap.bin | grep "4444"
-strings heap.bin | grep "0.0.0.0"
-```
 
 > **Note importante :** Dans ce scénario simplifié avec Python, les constantes de chaînes sont optimisées par l'interpréteur et stockées dans des sections read-only du code, pas dans la heap/stack modifiable. Un vrai malware compilé (C/C++) stockerait ses secrets dans des zones mémoire plus facilement extractibles.
 >
