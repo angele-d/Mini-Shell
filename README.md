@@ -1,5 +1,17 @@
 <h1> Systems Project 2025/26 </h1>
 
+<h2> Summary </h2>
+
+- [Group members](#group-members)
+- [Launching the mini-shell](#launching-the-mini-shell)
+- [Using the mini-shell](#using-the-mini-shell)
+
+## Group members
+
+- **Denys Angèle** - [angele-d](https://github.com/angele-d)
+- **Girres Elisa**
+- **Briand Thibault**
+
 ## Launching the mini-shell
 
 1. Cleaning up previous compilation files:
